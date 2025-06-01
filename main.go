@@ -74,7 +74,7 @@ func main() {
 						return nil
 					}
 
-					fmt.Printf("from: %s\nto: %s", from, to)
+					fmt.Printf("from: %s\nto: %s\n", from, to)
 					return nil
 				},
 			},
