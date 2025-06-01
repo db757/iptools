@@ -68,3 +68,7 @@ func ParseRange(s string) (*netipx.IPSet, error) {
 func ParseIP(s string) netip.Addr {
 	return netip.MustParseAddr(s)
 }
+
+func CIDRToRange(s string) netipx.IPRange {
+	return netipx.RangeOfPrefix(netip.MustParsePrefix(s))
+}

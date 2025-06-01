@@ -13,3 +13,8 @@ func IPInRange(ipStr, ranges string) bool {
 	ip := iprange.ParseIP(ipStr)
 	return ipset.Contains(ip)
 }
+
+func CIDRBoundaries(s string) (from, to string) {
+	ipRange := iprange.CIDRToRange(s)
+	return ipRange.From().String(), ipRange.To().String()
+}
