@@ -12,10 +12,20 @@ import (
 func main() {
 	var ip, ranges string
 	var cidr string
+	var short bool
 	cmd := &cli.Command{
-		UseShortOptionHandling: true,
 		Name:                   "ipt",
 		Usage:                  "IP Cli",
+		UseShortOptionHandling: true,
+		EnableShellCompletion:  true,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:        "short",
+				Usage:       "Short output",
+				Aliases:     []string{"s"},
+				Destination: &short,
+			},
+		},
 		Commands: []*cli.Command{
 			{
 				UseShortOptionHandling: true,
@@ -32,11 +42,18 @@ func main() {
 					},
 				},
 				Action: func(context.Context, *cli.Command) error {
-					if IPInRange(ip, ranges) {
+					isInRange := IPInRange(ip, ranges)
+					if short {
+						fmt.Println(isInRange)
+						return nil
+					}
+
+					if isInRange {
 						fmt.Printf("%s is in %s\n", ip, ranges)
 					} else {
 						fmt.Printf("%s is NOT in %s\n", ip, ranges)
 					}
+
 					return nil
 				},
 			},
@@ -52,8 +69,12 @@ func main() {
 				},
 				Action: func(context.Context, *cli.Command) error {
 					from, to := CIDRBoundaries(cidr)
-					fmt.Printf("from: %s\n", from)
-					fmt.Printf("to: %s\n", to)
+					if short {
+						fmt.Printf("%s-%s\n", from, to)
+						return nil
+					}
+
+					fmt.Printf("from: %s\nto: %s", from, to)
 					return nil
 				},
 			},

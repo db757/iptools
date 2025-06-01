@@ -1,6 +1,7 @@
 package iprange
 
 import (
+	"fmt"
 	"net/netip"
 	"regexp"
 	"strings"
@@ -15,6 +16,7 @@ import (
 // or IPv6 CIDR ("2001:db8::/64") form.
 // IPv4 CIDR, IPv4 subnet mask and IPv6 CIDR ranges don't include network and broadcast addresses.
 func ParseRanges(s string) (*netipx.IPSet, error) {
+	s = strings.ReplaceAll(s, ",", " ")
 	parts := strings.Fields(s)
 	if len(parts) == 0 {
 		return nil, nil
@@ -55,20 +57,38 @@ func ParseRange(s string) (*netipx.IPSet, error) {
 	var builder netipx.IPSetBuilder
 	switch {
 	case reIP.MatchString(s):
-		builder.Add(netip.MustParseAddr(s))
+		addr, err := netip.ParseAddr(s)
+		if err != nil {
+			return nil, err
+		}
+		builder.Add(addr)
 	case reRange.MatchString(s):
-		builder.AddRange(netipx.MustParseIPRange(s))
+		ipRange, err := netipx.ParseIPRange(s)
+		if err != nil {
+			return nil, err
+		}
+		builder.AddRange(ipRange)
 	case reCIDR.MatchString(s):
-		builder.AddPrefix(netip.MustParsePrefix(s))
+		prefix, err := netip.ParsePrefix(s)
+		if err != nil {
+			return nil, err
+		}
+		builder.AddPrefix(prefix)
+	default:
+		return nil, fmt.Errorf("invalid IP range format: %s", s)
 	}
 
 	return builder.IPSet()
 }
 
-func ParseIP(s string) netip.Addr {
-	return netip.MustParseAddr(s)
+func ParseIP(s string) (netip.Addr, error) {
+	return netip.ParseAddr(s)
 }
 
-func CIDRToRange(s string) netipx.IPRange {
-	return netipx.RangeOfPrefix(netip.MustParsePrefix(s))
+func CIDRToRange(s string) (netipx.IPRange, error) {
+	prefix, err := netip.ParsePrefix(s)
+	if err != nil {
+		return netipx.IPRange{}, err
+	}
+	return netipx.RangeOfPrefix(prefix), nil
 }
