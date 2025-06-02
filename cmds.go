@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
+	"net/netip"
+	"strings"
 
 	"github.com/db757/iptools/pkg/iprange"
 	"go4.org/netipx"
@@ -14,11 +17,19 @@ type Result interface {
 	Error() error
 }
 
+type ResultError struct {
+	err error
+}
+
+func (r *ResultError) Error() error {
+	return r.err
+}
+
 type ipInRangeResult struct {
 	ip       string
 	ranges   string
-	err      error
 	contains bool
+	ResultError
 }
 
 func (r *ipInRangeResult) Result() string {
@@ -30,10 +41,6 @@ func (r *ipInRangeResult) Result() string {
 
 func (r *ipInRangeResult) Short() string {
 	return fmt.Sprintf("%t", r.contains)
-}
-
-func (r *ipInRangeResult) Error() error {
-	return r.err
 }
 
 func IPInRange(ipStr, ranges string) ipInRangeResult {
@@ -61,17 +68,33 @@ func IPInRange(ipStr, ranges string) ipInRangeResult {
 }
 
 type cidrBoundariesResult struct {
-	cidr    string
-	ipRange netipx.IPRange
-	err     error
+	from, to string
+	cidr     netip.Prefix
+	cidrLen  string
+	ResultError
 }
 
 func (r *cidrBoundariesResult) Result() string {
-	return fmt.Sprintf("from: %s\nto: %s", r.ipRange.From(), r.ipRange.To())
+	return fmt.Sprintf("%s (%s addresses):\nfrom: %s\nto: %s", r.cidr, cidrLen(r.cidr), r.from, r.to)
+}
+
+func cidrLen(cidr netip.Prefix) string {
+	bitlen := cidr.Addr().BitLen()
+	if bitlen == 0 {
+		return "unknown number of"
+	}
+
+	if cidr.Addr().Is6() && cidr.Bits() < 65 {
+		// Too large to calculate directly
+		return fmt.Sprintf("more than %d", uint64(math.MaxUint64))
+	}
+
+	cidrLen := uint64(1) << (bitlen - cidr.Bits())
+	return fmt.Sprintf("%d", cidrLen)
 }
 
 func (r *cidrBoundariesResult) Short() string {
-	return fmt.Sprintf("%s-%s", r.ipRange.From(), r.ipRange.To())
+	return fmt.Sprintf("%s-%s", r.from, r.to)
 }
 
 func (r *cidrBoundariesResult) Error() error {
@@ -79,16 +102,118 @@ func (r *cidrBoundariesResult) Error() error {
 }
 
 func CIDRBoundaries(s string) cidrBoundariesResult {
-	result := cidrBoundariesResult{
-		cidr: s,
-	}
-	ipRange, err := iprange.CIDRToRange(s)
+	result := cidrBoundariesResult{}
+
+	cidr, err := netip.ParsePrefix(s)
 	if err != nil {
-		log.Printf("failed to parse CIDR %q: %v", s, err)
-		result.err = err
+		result.err = fmt.Errorf("failed to parse CIDR %q: %w", s, err)
 		return result
 	}
 
-	result.ipRange = ipRange
+	result.cidr = cidr
+	result.cidrLen = cidrLen(cidr)
+	result.from = cidr.Addr().String()
+	result.to = netipx.PrefixLastIP(cidr).String()
+	return result
+}
+
+type NextPrevResult struct {
+	outputPrefix string
+	addr         netip.Addr
+	ResultError
+}
+
+func (r *NextPrevResult) Result() string {
+	return fmt.Sprintf("%s IP: %s", r.outputPrefix, r.addr)
+}
+
+func (r *NextPrevResult) Short() string {
+	return r.addr.String()
+}
+
+func Next(s string) NextPrevResult {
+	result := NextPrevResult{
+		outputPrefix: "Next",
+	}
+	ip, err := netip.ParseAddr(s)
+	if err != nil {
+		result.err = fmt.Errorf("failed to parse IP %q: %w", s, err)
+	}
+
+	result.addr = ip.Next()
+	return result
+}
+
+func Prev(s string) NextPrevResult {
+	result := NextPrevResult{
+		outputPrefix: "Prev",
+	}
+	ip, err := netip.ParseAddr(s)
+	if err != nil {
+		result.err = fmt.Errorf("failed to parse IP %q: %w", s, err)
+	}
+
+	result.addr = ip.Prev()
+	return result
+}
+
+type GetNResult struct {
+	ips   []string
+	count int
+	ResultError
+}
+
+func (r *GetNResult) Result() string {
+	return fmt.Sprintf("%d IPs: %s", r.count, strings.Join(r.ips, ","))
+}
+
+func (r *GetNResult) Short() string {
+	return fmt.Sprint(strings.Join(r.ips, ","))
+}
+
+func GetN(s string, count int, offset int, tail bool) GetNResult {
+	result := GetNResult{
+		count: count,
+	}
+
+	cidr, err := netip.ParsePrefix(s)
+	if err != nil {
+		result.err = fmt.Errorf("failed to parse prefix %s: %w", s, err)
+		return result
+	}
+
+	ipRange := netipx.RangeOfPrefix(cidr)
+
+	if count < 1 {
+		result.err = fmt.Errorf("count must be greater than 0")
+		return result
+	}
+
+	// Skip network address
+	ip := ipRange.From().Next()
+
+	next := func(ip netip.Addr) netip.Addr {
+		return ip.Next()
+	}
+
+	if tail {
+		ip = ipRange.To().Prev()
+		next = func(ip netip.Addr) netip.Addr {
+			return ip.Prev()
+		}
+	}
+
+	for range offset {
+		ip = next(ip)
+	}
+
+	for range count {
+		if !ip.IsValid() || !ipRange.Contains(ip) {
+			break
+		}
+		result.ips = append(result.ips, ip.String())
+		ip = next(ip)
+	}
+
 	return result
 }

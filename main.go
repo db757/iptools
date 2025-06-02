@@ -19,6 +19,7 @@ func main() {
 	inputs := struct {
 		primary   string
 		secondary string
+		count     int
 	}{}
 
 	cmd := &cli.Command{
@@ -66,6 +67,68 @@ func main() {
 				},
 				Action: func(context.Context, *cli.Command) error {
 					result := CIDRBoundaries(inputs.primary)
+					return handleResult(&result)
+				},
+			},
+			{
+				UseShortOptionHandling: true,
+				Name:                   "next",
+				Usage:                  "Get next IP",
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name:        "<ip>",
+						Destination: &inputs.primary,
+					},
+				},
+				Action: func(context.Context, *cli.Command) error {
+					result := Next(inputs.primary)
+					return handleResult(&result)
+				},
+			},
+			{
+				UseShortOptionHandling: true,
+				Name:                   "prev",
+				Usage:                  "Get previous IP",
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name:        "<ip>",
+						Destination: &inputs.primary,
+					},
+				},
+				Action: func(context.Context, *cli.Command) error {
+					result := Prev(inputs.primary)
+					return handleResult(&result)
+				},
+			},
+			{
+				UseShortOptionHandling: true,
+				Name:                   "getn",
+				Usage:                  "Get N IPs from CIDR, not including the network",
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name:        "<cidr>",
+						Destination: &inputs.primary,
+					},
+					&cli.IntArg{
+						Name:        "<count>",
+						Destination: &inputs.count,
+					},
+				},
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:    "offset",
+						Value:   0,
+						Usage:   "Number of IPs to skip before starting to return results",
+						Aliases: []string{"o"},
+					},
+					&cli.BoolFlag{
+						Name:    "tail",
+						Usage:   "Count backwards from the end of the range",
+						Aliases: []string{"t"},
+					},
+				},
+				Action: func(_ context.Context, cmd *cli.Command) error {
+					result := GetN(inputs.primary, inputs.count, cmd.Int("offset"), cmd.Bool("tail"))
 					return handleResult(&result)
 				},
 			},
