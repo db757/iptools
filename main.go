@@ -41,7 +41,7 @@ func main() {
 				Usage:                  "Check if IP is in range",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "<ip ",
+						Name:        "<ip> ",
 						Destination: &inputs.primary,
 					},
 					&cli.StringArg{
