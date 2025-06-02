@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/db757/go-iprange/pkg/iprange"
+	"github.com/db757/iptools/pkg/iprange"
 	"go4.org/netipx"
 )
 

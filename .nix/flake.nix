@@ -1,5 +1,5 @@
 {
-  description = "github.com/db757/go-iprange development environment";
+  description = "github.com/db757/iptools development environment";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -11,9 +11,9 @@
       let pkgs = import nixpkgs { inherit system; };
       in {
         devShells.default = pkgs.mkShell {
-          name = "github.com/db757/go-iprange";
+          name = "github.com/db757/iptools";
           env = {
-            PROJECT_NAME = "github.com/db757/go-iprange";
+            PROJECT_NAME = "github.com/db757/iptools";
             # CGO_ENABLED = "0"; # Disable CGO for pure Go builds
           };
 

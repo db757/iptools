@@ -1,4 +1,4 @@
-module github.com/db757/go-iprange
+module github.com/db757/iptools
 
 go 1.24.3
 
