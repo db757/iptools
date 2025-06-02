@@ -7,6 +7,7 @@ dist="dist"
 build() {
   mkdir -p $dist
   go build -o "$dist/$binary_name" *.go
+  chmod +x "$dist/$binary_name"
 }
 
 run() {

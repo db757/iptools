@@ -10,11 +10,6 @@ import (
 )
 
 // ParseRanges parses s as a space separated list of IP Ranges, returning the result and an error if any.
-// IP Range can be in IPv4 address ("192.0.2.1"), IPv4 range ("192.0.2.0-192.0.2.10")
-// IPv4 CIDR ("192.0.2.0/24")
-// IPv6 address ("2001:db8::1"), IPv6 range ("2001:db8::-2001:db8::10"),
-// or IPv6 CIDR ("2001:db8::/64") form.
-// IPv4 CIDR, IPv4 subnet mask and IPv6 CIDR ranges don't include network and broadcast addresses.
 func ParseRanges(s string) (*netipx.IPSet, error) {
 	s = strings.ReplaceAll(s, ",", " ")
 	parts := strings.Fields(s)
