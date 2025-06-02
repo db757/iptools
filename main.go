@@ -9,10 +9,18 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+var config = struct {
+	short bool
+}{
+	short: false,
+}
+
 func main() {
-	var ip, ranges string
-	var cidr string
-	var short bool
+	inputs := struct {
+		primary   string
+		secondary string
+	}{}
+
 	cmd := &cli.Command{
 		Name:                   "ipt",
 		Usage:                  "IP Cli",
@@ -23,7 +31,7 @@ func main() {
 				Name:        "short",
 				Usage:       "Short output",
 				Aliases:     []string{"s"},
-				Destination: &short,
+				Destination: &config.short,
 			},
 		},
 		Commands: []*cli.Command{
@@ -34,27 +42,16 @@ func main() {
 				Arguments: []cli.Argument{
 					&cli.StringArg{
 						Name:        "ip",
-						Destination: &ip,
+						Destination: &inputs.primary,
 					},
 					&cli.StringArg{
 						Name:        "ranges",
-						Destination: &ranges,
+						Destination: &inputs.secondary,
 					},
 				},
 				Action: func(context.Context, *cli.Command) error {
-					isInRange := IPInRange(ip, ranges)
-					if short {
-						fmt.Println(isInRange)
-						return nil
-					}
-
-					if isInRange {
-						fmt.Printf("%s is in %s\n", ip, ranges)
-					} else {
-						fmt.Printf("%s is NOT in %s\n", ip, ranges)
-					}
-
-					return nil
+					result := IPInRange(inputs.primary, inputs.secondary)
+					return handleResult(&result)
 				},
 			},
 			{
@@ -64,18 +61,12 @@ func main() {
 				Arguments: []cli.Argument{
 					&cli.StringArg{
 						Name:        "cidr",
-						Destination: &cidr,
+						Destination: &inputs.primary,
 					},
 				},
 				Action: func(context.Context, *cli.Command) error {
-					from, to := CIDRBoundaries(cidr)
-					if short {
-						fmt.Printf("%s-%s\n", from, to)
-						return nil
-					}
-
-					fmt.Printf("from: %s\nto: %s\n", from, to)
-					return nil
+					result := CIDRBoundaries(inputs.primary)
+					return handleResult(&result)
 				},
 			},
 		},
@@ -84,4 +75,18 @@ func main() {
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func handleResult(result Result) error {
+	if result.Error() != nil {
+		return result.Error()
+	}
+
+	if config.short {
+		fmt.Println(result.Short())
+		return nil
+	}
+
+	fmt.Println(result.Result())
+	return nil
 }
