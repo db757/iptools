@@ -41,11 +41,11 @@ func main() {
 				Usage:                  "Check if IP is in range",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "ip",
+						Name:        "<ip ",
 						Destination: &inputs.primary,
 					},
 					&cli.StringArg{
-						Name:        "ranges",
+						Name:        "<ranges>",
 						Destination: &inputs.secondary,
 					},
 				},
@@ -57,10 +57,10 @@ func main() {
 			{
 				UseShortOptionHandling: true,
 				Name:                   "cidrange",
-				Usage:                  "given a CIDR, return the range",
+				Usage:                  "Given a CIDR, return the range",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "cidr",
+						Name:        "<cidr>",
 						Destination: &inputs.primary,
 					},
 				},
