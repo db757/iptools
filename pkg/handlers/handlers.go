@@ -8,7 +8,7 @@ import (
 	"net/netip"
 	"strings"
 
-	"github.com/db757/iptools/internal/parse"
+	"github.com/db757/iptools/pkg/parse"
 	"github.com/urfave/cli/v3"
 	"go4.org/netipx"
 )

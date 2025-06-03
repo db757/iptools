@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/db757/iptools/internal/handlers"
+	"github.com/db757/iptools/pkg/handlers"
 	"github.com/urfave/cli/v3"
 )
 

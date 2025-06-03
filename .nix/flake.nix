@@ -12,6 +12,9 @@
       in {
         devShells.default = pkgs.mkShell {
           name = "github.com/db757/iptools";
+          hardeningDisable =
+            [ "fortify" ]; # Fix for debugging go tests with CGO_ENABLED=1
+
           env = {
             PROJECT_NAME = "github.com/db757/iptools";
             # CGO_ENABLED = "0"; # Disable CGO for pure Go builds
