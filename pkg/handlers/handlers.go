@@ -10,6 +10,8 @@ import (
 	"github.com/db757/iptools/pkg/parse"
 	"github.com/urfave/cli/v3"
 	"go4.org/netipx"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 type AppInput struct {
@@ -146,7 +148,8 @@ func cidrLen(cidr netip.Prefix) string {
 	bits := bitlen - cidr.Bits()
 	if cidr.Addr().Is4() || bits < 20 {
 		cidrLen := uint64(1) << (bitlen - cidr.Bits())
-		return fmt.Sprintf("%d", cidrLen)
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("%d", cidrLen)
 	}
 
 	switch {

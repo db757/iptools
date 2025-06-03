@@ -202,13 +202,13 @@ func TestCIDRBoundariesHandler(t *testing.T) {
 			name:      "IPv4 65536 Addresses (/16)",
 			cidr:      "192.0.0.0/16",
 			wantShort: "192.0.0.0-192.0.255.255",
-			wantLong:  "192.0.0.0/16 (65536 addresses):\nfrom: 192.0.0.0\nto: 192.0.255.255",
+			wantLong:  "192.0.0.0/16 (65,536 addresses):\nfrom: 192.0.0.0\nto: 192.0.255.255",
 		},
 		{
 			name:      "IPv4 16777216 Addresses (/8)",
 			cidr:      "192.0.0.0/8",
 			wantShort: "192.0.0.0-192.255.255.255",
-			wantLong:  "192.0.0.0/8 (16777216 addresses):\nfrom: 192.0.0.0\nto: 192.255.255.255",
+			wantLong:  "192.0.0.0/8 (16,777,216 addresses):\nfrom: 192.0.0.0\nto: 192.255.255.255",
 		},
 		{
 			name:      "IPv6 Nonillions (bits < 30)",
@@ -268,7 +268,7 @@ func TestCIDRBoundariesHandler(t *testing.T) {
 			name:      "IPv6 Millions (bits < 120)",
 			cidr:      "2001:db8::/115",
 			wantShort: "2001:db8::-2001:db8::1fff",
-			wantLong:  "2001:db8::/115 (8192 addresses):\nfrom: 2001:db8::\nto: 2001:db8::1fff",
+			wantLong:  "2001:db8::/115 (8,192 addresses):\nfrom: 2001:db8::\nto: 2001:db8::1fff",
 		},
 		{
 			name:      "IPv6 Millions (bits <= 128)",
