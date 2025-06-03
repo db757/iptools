@@ -4,3 +4,10 @@ pre-push:
       runner: make lint
     test:
       runner: make test
+
+pre-commit:
+  scripts:
+    lint:
+      runner: golangci-lint run
+    test:
+      runner: go test ./...
