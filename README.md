@@ -100,7 +100,6 @@ Options:
 - `make nix-install`: Install to Nix profile
 - `make nix-update`: Update gomod2nix.toml
 - `make nix-shell`: Enter Nix development shell
-- `make nix-sbom`: Generate Software Bill of Materials
 
 ## Dependencies
 
