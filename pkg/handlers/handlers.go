@@ -143,7 +143,7 @@ func cidrLen(cidr netip.Prefix) string {
 		return "unknown number of"
 	}
 
-	bits := cidr.Bits()
+	bits := bitlen - cidr.Bits()
 	if cidr.Addr().Is4() || bits < 20 {
 		cidrLen := uint64(1) << (bitlen - cidr.Bits())
 		return fmt.Sprintf("%d", cidrLen)
