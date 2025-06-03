@@ -44,7 +44,8 @@
           buildInputs = with pkgs; [
             go
             gopls
-            golint
+            golangci-lint
+            golangci-lint-langserver
             gotools
             gomod2nix.packages.${system}.default # gomod2nix CLI
           ];

@@ -22,12 +22,12 @@ func captureOutput(t *testing.T, fn func() error) (string, error) {
 
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, _ = io.Copy(&buf, r)
 		outC <- buf.String()
 	}()
 
 	err = fn()
-	w.Close()
+	_ = w.Close()
 	os.Stdout = old
 	out := <-outC
 

@@ -79,7 +79,7 @@ func TestParseRanges(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseRanges(tt.input)
+			got, err := Ranges(tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -181,7 +181,7 @@ func TestParseRange(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseRange(tt.input)
+			got, err := Range(tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

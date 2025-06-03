@@ -118,7 +118,7 @@ func ipInRange(ipStr, ranges string) ipInRangeResult {
 		ranges: ranges,
 	}
 
-	ipset, err := parse.ParseRanges(ranges)
+	ipset, err := parse.Ranges(ranges)
 	if err != nil {
 		log.Printf("failed to parse ranges %q: %v", ranges, err)
 		result.err = err
