@@ -1,0 +1,6 @@
+pre-push:
+  scripts:
+    lint:
+      runner: make lint
+    test:
+      runner: make test

@@ -49,6 +49,7 @@
             golangci-lint-langserver
             gotools
             govulncheck
+            lefthook
             gomod2nix.packages.${system}.default # gomod2nix CLI
           ];
 
