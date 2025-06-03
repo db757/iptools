@@ -262,7 +262,7 @@ func TestCIDRBoundariesHandler(t *testing.T) {
 			name:      "IPv6 Millions (bits < 110)",
 			cidr:      "2001:db8::/105",
 			wantShort: "2001:db8::-2001:db8::7f:ffff",
-			wantLong:  "2001:db8::/105 (~Millions addresses):\nfrom: 2001:db8::\nto: 2001:db8::7f:ffff",
+			wantLong:  "2001:db8::/105 (8,388,608 addresses):\nfrom: 2001:db8::\nto: 2001:db8::7f:ffff",
 		},
 		{
 			name:      "IPv6 Millions (bits < 120)",

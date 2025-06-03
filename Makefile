@@ -2,7 +2,7 @@ BINARY_NAME := ipt
 DIST_DIR := ./dist
 GOLIST := $(shell go list ./...)
 
-build: tidy clean fmt lint vet test
+build: tidy clean fmt lint vet test nix-update
 	mkdir ${DIST_DIR}/
 	go build -o ${DIST_DIR}/${BINARY_NAME} ./
 .PHONY: build

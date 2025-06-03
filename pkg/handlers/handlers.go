@@ -146,7 +146,7 @@ func cidrLen(cidr netip.Prefix) string {
 	}
 
 	bits := bitlen - cidr.Bits()
-	if cidr.Addr().Is4() || bits < 20 {
+	if bits < 33 {
 		cidrLen := uint64(1) << (bitlen - cidr.Bits())
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("%d", cidrLen)
