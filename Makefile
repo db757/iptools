@@ -29,7 +29,6 @@ vet: fmt
 .PHONY: vet
 
 govulncheck:
-	go install golang.org/x/vuln/cmd/govulncheck@latest
 	govulncheck --show verbose ./...
 .PHONY: govulncheck
 
