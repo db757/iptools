@@ -13,7 +13,7 @@ func main() {
 	app := handlers.NewApp()
 
 	cmd := &cli.Command{
-		Name:                   "ipt",
+		Name:                   "iptools - a CLI for working with IP addresses and CIDRs",
 		Usage:                  "IP Cli",
 		UseShortOptionHandling: true,
 		EnableShellCompletion:  true,
