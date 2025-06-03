@@ -27,6 +27,7 @@
 
           vendorHash = null;
           postInstall = ''
+            # Rename the binary
             mv $out/bin/${package_name} $out/bin/${bin_name}
           '';
         };
