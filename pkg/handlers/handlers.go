@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"net/netip"
 	"strings"
 
@@ -144,13 +143,37 @@ func cidrLen(cidr netip.Prefix) string {
 		return "unknown number of"
 	}
 
-	if cidr.Addr().Is6() && cidr.Bits() < 65 {
-		// Too large to calculate directly
-		return fmt.Sprintf("more than %d", uint64(math.MaxUint64))
+	bits := cidr.Bits()
+	if cidr.Addr().Is4() || bits < 20 {
+		cidrLen := uint64(1) << (bitlen - cidr.Bits())
+		return fmt.Sprintf("%d", cidrLen)
 	}
 
-	cidrLen := uint64(1) << (bitlen - cidr.Bits())
-	return fmt.Sprintf("%d", cidrLen)
+	switch {
+	case bits < 30:
+		return "~Millions"
+	case bits < 40:
+		return "~Billions"
+	case bits < 50:
+		return "~Trillions"
+	case bits < 60:
+		return "~Quadrillions"
+	case bits < 70:
+		return "~Quintillions"
+	case bits < 80:
+		return "~Sextillions"
+	case bits < 90:
+		return "~Septillions"
+	case bits < 100:
+		return "~Octillions"
+	case bits < 110:
+		return "~Nonillions"
+	case bits < 120:
+		return "~Decillions"
+	case bits <= 128:
+		return "~Undecillions"
+	}
+	return "unknown number of"
 }
 
 func (r *cidrBoundariesResult) short() string {
