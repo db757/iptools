@@ -13,54 +13,45 @@ import (
 	"go4.org/netipx"
 )
 
-// AppInput - Inputs from cli
 type AppInput struct {
 	Primary   string
 	Secondary string
 	Count     int
 }
 
-// AppConfig - Global app configuration
 type AppConfig struct {
 	Short bool
 }
 
-// App - Global app structure
 type App struct {
 	Config AppConfig
 	Input  AppInput
 }
 
-// NewApp - Get new app instance
 func NewApp() App {
 	return App{}
 }
 
-// InRangeHandler - "inrange" Command handler
 func (a *App) InRangeHandler(context.Context, *cli.Command) error {
 	result := ipInRange(a.Input.Primary, a.Input.Secondary)
 	return a.handleResult(&result)
 }
 
-// CIDRBoundariesHandler - "cidrange" Command handler
 func (a *App) CIDRBoundariesHandler(context.Context, *cli.Command) error {
 	result := cidrBoundaries(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
-// NextHandler - "next" Command handler
 func (a *App) NextHandler(context.Context, *cli.Command) error {
 	result := next(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
-// PrevHandler - "prev" Command handler
 func (a *App) PrevHandler(context.Context, *cli.Command) error {
 	result := prev(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
-// GetNHandler - "getn" Command handler
 func (a *App) GetNHandler(_ context.Context, cmd *cli.Command) error {
 	result := getN(a.Input.Primary, a.Input.Count, cmd.Int("offset"), cmd.Bool("tail"))
 	return a.handleResult(&result)
