@@ -1,7 +1,7 @@
 BINARY_NAME := ipt
 DIST_DIR := ./dist
 
-build: tidy clean fmt vet test
+build: tidy clean fmt vet test nix-update
 	mkdir ${DIST_DIR}/
 	go build -o ${DIST_DIR}/${BINARY_NAME} ./
 .PHONY: build
@@ -42,6 +42,22 @@ clean:
 	go clean
 .PHONY: clean
 
+nix-update:
+	gomod2nix generate
+.PHONY: nix-update
+
+nix-build: nix-update
+	nix build
+.PHONY: nix-build
+
+nix-install:
+	nix profile install
+.PHONY: nix-install
+
+nix-shell:
+	nix develop
+.PHONY: nix-shell
+
 targets: clean
 	echo "Compiling targets"
 	GOOS=linux GOARCH=amd64 go build -o ${DIST_DIR}/${BINARY_NAME}-linux-amd64 ./
@@ -51,4 +67,3 @@ targets: clean
 run: vet
 	go run ./
 .PHONY: run
-

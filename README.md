@@ -8,17 +8,36 @@ A command-line tool for IP address operations and CIDR range manipulations.
 
 ## Installation
 
+### Using Go
+
 ```bash
 go install github.com/db757/iptools@latest
 ```
 
-Or build from source:
+### Using Nix
+
+```bash
+nix profile install github:db757/iptools
+```
+
+### Building from Source
+
+#### Using Go
 
 ```bash
 make build
 ```
 
 The binary will be created in the `dist` directory.
+
+#### Using Nix
+
+```bash
+make nix-build
+make nix-install
+```
+
+The binary will be created in the `result/bin` directory.
 
 ## Usage
 
@@ -62,7 +81,9 @@ Options:
 
 ### Available Make Commands
 
-- `make build`: Build the project (includes tidy, clean, fmt, vet, test)
+#### Go Commands
+
+- `make build`: Build the project (includes tidy, clean, fmt, vet, test, nix-update)
 - `make test`: Run tests
 - `make fmt`: Format code
 - `make vet`: Run go vet
@@ -72,6 +93,14 @@ Options:
 - `make govulncheck`: Run vulnerability checks
 - `make upgrade`: Upgrade dependencies
 - `make run`: Run the application (includes vet)
+
+#### Nix Commands
+
+- `make nix-build`: Build using Nix
+- `make nix-install`: Install to Nix profile
+- `make nix-update`: Update gomod2nix.toml
+- `make nix-shell`: Enter Nix development shell
+- `make nix-sbom`: Generate Software Bill of Materials
 
 ## Dependencies
 
