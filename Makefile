@@ -1,6 +1,5 @@
 BINARY_NAME := ipt
 DIST_DIR := ./dist
-GOLIST := $(shell go list ./...)
 
 build: tidy clean fmt lint vet test nix-update
 	mkdir ${DIST_DIR}/
@@ -17,7 +16,7 @@ fmt:
 .PHONY: fmt
 
 lint: fmt
-	golangci-lint run --timeout 10s
+	golangci-lint run
 .PHONY: lint
 
 test:
@@ -37,7 +36,7 @@ upgrade:
 	go mod tidy
 .PHONY: upgrade
 
-clean:
+clean: nix-clean
 	rm -Rf ${DIST_DIR}
 	go clean
 .PHONY: clean
@@ -49,6 +48,10 @@ nix-update:
 nix-build: nix-update
 	nix build
 .PHONY: nix-build
+
+nix-clean:
+	unlink result 2>/dev/null || true
+.PHONY: nix-clean
 
 nix-install:
 	nix profile install
