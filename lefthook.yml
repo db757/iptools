@@ -1,11 +1,11 @@
-pre-commit:
-  parallel: true
-  jobs:
-    - name: lint
-      run: make lint
-
-    - name: test
-      run: make test
+# pre-commit:
+#   parallel: true
+#   jobs:
+#     - name: lint
+#       run: make lint
+#
+#     - name: test
+#       run: make test
 
 pre-push:
   parallel: true
@@ -15,3 +15,6 @@ pre-push:
 
     - name: test
       run: make test
+
+    - name: check vulnerabilities
+      run: make govulncheck
