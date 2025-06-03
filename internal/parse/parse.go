@@ -1,4 +1,4 @@
-package iprange
+package parse
 
 import (
 	"fmt"
@@ -74,16 +74,4 @@ func ParseRange(s string) (*netipx.IPSet, error) {
 	}
 
 	return builder.IPSet()
-}
-
-func ParseIP(s string) (netip.Addr, error) {
-	return netip.ParseAddr(s)
-}
-
-func CIDRToRange(s string) (netipx.IPRange, error) {
-	prefix, err := netip.ParsePrefix(s)
-	if err != nil {
-		return netipx.IPRange{}, err
-	}
-	return netipx.RangeOfPrefix(prefix), nil
 }

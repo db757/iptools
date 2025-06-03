@@ -1,15 +1,75 @@
-package main
+package handlers
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math"
 	"net/netip"
 	"strings"
 
-	"github.com/db757/iptools/pkg/iprange"
+	"github.com/db757/iptools/internal/parse"
+	"github.com/urfave/cli/v3"
 	"go4.org/netipx"
 )
+
+type AppInput struct {
+	Primary   string
+	Secondary string
+	Count     int
+}
+
+type AppConfig struct {
+	Short bool
+}
+
+type App struct {
+	Config AppConfig
+	Input  AppInput
+}
+
+func NewApp() App {
+	return App{}
+}
+
+func (a *App) InRangeHandler(context.Context, *cli.Command) error {
+	result := IPInRange(a.Input.Primary, a.Input.Secondary)
+	return a.handleResult(&result)
+}
+
+func (a *App) CIDRBoundariesHandler(context.Context, *cli.Command) error {
+	result := CIDRBoundaries(a.Input.Primary)
+	return a.handleResult(&result)
+}
+
+func (a *App) NextHandler(context.Context, *cli.Command) error {
+	result := Next(a.Input.Primary)
+	return a.handleResult(&result)
+}
+
+func (a *App) PrevHandler(context.Context, *cli.Command) error {
+	result := Prev(a.Input.Primary)
+	return a.handleResult(&result)
+}
+
+func (a *App) GetNHandler(_ context.Context, cmd *cli.Command) error {
+	result := GetN(a.Input.Primary, a.Input.Count, cmd.Int("offset"), cmd.Bool("tail"))
+	return a.handleResult(&result)
+}
+
+func (a *App) handleResult(result Result) error {
+	if result.Error() != nil {
+		return result.Error()
+	}
+
+	if a.Config.Short {
+		fmt.Println(result.Short())
+		return nil
+	}
+
+	fmt.Println(result.Result())
+	return nil
+}
 
 type Result interface {
 	Result() string
@@ -49,14 +109,14 @@ func IPInRange(ipStr, ranges string) ipInRangeResult {
 		ranges: ranges,
 	}
 
-	ipset, err := iprange.ParseRanges(ranges)
+	ipset, err := parse.ParseRanges(ranges)
 	if err != nil {
 		log.Printf("failed to parse ranges %q: %v", ranges, err)
 		result.err = err
 		return result
 	}
 
-	ip, err := iprange.ParseIP(ipStr)
+	ip, err := netip.ParseAddr(ipStr)
 	if err != nil {
 		log.Printf("failed to parse IP %q: %v", ipStr, err)
 		result.err = err
@@ -191,6 +251,7 @@ func GetN(s string, count int, offset int, tail bool) GetNResult {
 
 	// Skip network address
 	ip := ipRange.From().Next()
+	last := ipRange.To()
 
 	next := func(ip netip.Addr) netip.Addr {
 		return ip.Next()
@@ -198,6 +259,7 @@ func GetN(s string, count int, offset int, tail bool) GetNResult {
 
 	if tail {
 		ip = ipRange.To().Prev()
+		last = ipRange.From()
 		next = func(ip netip.Addr) netip.Addr {
 			return ip.Prev()
 		}
@@ -208,7 +270,7 @@ func GetN(s string, count int, offset int, tail bool) GetNResult {
 	}
 
 	for range count {
-		if !ip.IsValid() || !ipRange.Contains(ip) {
+		if !ip.IsValid() || ip == last {
 			break
 		}
 		result.ips = append(result.ips, ip.String())

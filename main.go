@@ -2,25 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
+	"github.com/db757/iptools/internal/handlers"
 	"github.com/urfave/cli/v3"
 )
 
-var config = struct {
-	short bool
-}{
-	short: false,
-}
-
 func main() {
-	inputs := struct {
-		primary   string
-		secondary string
-		count     int
-	}{}
+	app := handlers.NewApp()
 
 	cmd := &cli.Command{
 		Name:                   "ipt",
@@ -32,86 +22,75 @@ func main() {
 				Name:        "short",
 				Usage:       "Short output",
 				Aliases:     []string{"s"},
-				Destination: &config.short,
+				Destination: &app.Config.Short,
 			},
 		},
 		Commands: []*cli.Command{
 			{
-				UseShortOptionHandling: true,
-				Name:                   "inrange",
-				Usage:                  "Check if IP is in range",
+				Name:      "inrange",
+				Usage:     "Check if IP is in range",
+				UsageText: "ipt inrange [ip] [ranges]",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "<ip> ",
-						Destination: &inputs.primary,
+						Name:        "ip",
+						Destination: &app.Input.Primary,
 					},
 					&cli.StringArg{
-						Name:        "<ranges>",
-						Destination: &inputs.secondary,
+						Name:        "ranges",
+						Destination: &app.Input.Secondary,
 					},
 				},
-				Action: func(context.Context, *cli.Command) error {
-					result := IPInRange(inputs.primary, inputs.secondary)
-					return handleResult(&result)
-				},
+				Action: app.InRangeHandler,
 			},
 			{
-				UseShortOptionHandling: true,
-				Name:                   "cidrange",
-				Usage:                  "Given a CIDR, return the range",
+				Name:      "cidrange",
+				Usage:     "Given a CIDR, return the range",
+				UsageText: "ipt cidrange [cidr]",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "<cidr>",
-						Destination: &inputs.primary,
+						Name:        "cidr",
+						Destination: &app.Input.Primary,
 					},
 				},
-				Action: func(context.Context, *cli.Command) error {
-					result := CIDRBoundaries(inputs.primary)
-					return handleResult(&result)
-				},
+				Action: app.CIDRBoundariesHandler,
 			},
 			{
-				UseShortOptionHandling: true,
-				Name:                   "next",
-				Usage:                  "Get next IP",
+				Name:      "next",
+				Usage:     "Get next IP",
+				UsageText: "ipt next [ip]",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "<ip>",
-						Destination: &inputs.primary,
+						Name:        "ip",
+						Destination: &app.Input.Primary,
 					},
 				},
-				Action: func(context.Context, *cli.Command) error {
-					result := Next(inputs.primary)
-					return handleResult(&result)
-				},
+				Action: app.NextHandler,
 			},
 			{
-				UseShortOptionHandling: true,
-				Name:                   "prev",
-				Usage:                  "Get previous IP",
+				Name:      "prev",
+				Usage:     "Get previous IP",
+				UsageText: "ipt prev [ip]",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "<ip>",
-						Destination: &inputs.primary,
+						Name:        "ip",
+						Destination: &app.Input.Primary,
 					},
 				},
-				Action: func(context.Context, *cli.Command) error {
-					result := Prev(inputs.primary)
-					return handleResult(&result)
-				},
+				Action: app.PrevHandler,
 			},
 			{
 				UseShortOptionHandling: true,
 				Name:                   "getn",
-				Usage:                  "Get N IPs from CIDR, not including the network",
+				Usage:                  "Get N IPs from CIDR, not including the network address and broadcast address",
+				UsageText:              "ipt getn [cidr] [count] [--offset|-o offset] [--tail|-t]",
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:        "<cidr>",
-						Destination: &inputs.primary,
+						Name:        "cidr",
+						Destination: &app.Input.Primary,
 					},
 					&cli.IntArg{
-						Name:        "<count>",
-						Destination: &inputs.count,
+						Name:        "count",
+						Destination: &app.Input.Count,
 					},
 				},
 				Flags: []cli.Flag{
@@ -127,10 +106,7 @@ func main() {
 						Aliases: []string{"t"},
 					},
 				},
-				Action: func(_ context.Context, cmd *cli.Command) error {
-					result := GetN(inputs.primary, inputs.count, cmd.Int("offset"), cmd.Bool("tail"))
-					return handleResult(&result)
-				},
+				Action: app.GetNHandler,
 			},
 		},
 	}
@@ -138,18 +114,4 @@ func main() {
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func handleResult(result Result) error {
-	if result.Error() != nil {
-		return result.Error()
-	}
-
-	if config.short {
-		fmt.Println(result.Short())
-		return nil
-	}
-
-	fmt.Println(result.Result())
-	return nil
 }
