@@ -13,75 +13,84 @@ import (
 	"go4.org/netipx"
 )
 
+// AppInput - Inputs from cli
 type AppInput struct {
 	Primary   string
 	Secondary string
 	Count     int
 }
 
+// AppConfig - Global app configuration
 type AppConfig struct {
 	Short bool
 }
 
+// App - Global app structure
 type App struct {
 	Config AppConfig
 	Input  AppInput
 }
 
+// NewApp - Get new app instance
 func NewApp() App {
 	return App{}
 }
 
+// InRangeHandler - "inrange" Command handler
 func (a *App) InRangeHandler(context.Context, *cli.Command) error {
 	result := ipInRange(a.Input.Primary, a.Input.Secondary)
 	return a.handleResult(&result)
 }
 
+// CIDRBoundariesHandler - "cidrange" Command handler
 func (a *App) CIDRBoundariesHandler(context.Context, *cli.Command) error {
 	result := cidrBoundaries(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
+// NextHandler - "next" Command handler
 func (a *App) NextHandler(context.Context, *cli.Command) error {
 	result := next(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
+// PrevHandler - "prev" Command handler
 func (a *App) PrevHandler(context.Context, *cli.Command) error {
 	result := prev(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
+// GetNHandler - "getn" Command handler
 func (a *App) GetNHandler(_ context.Context, cmd *cli.Command) error {
 	result := getN(a.Input.Primary, a.Input.Count, cmd.Int("offset"), cmd.Bool("tail"))
 	return a.handleResult(&result)
 }
 
-func (a *App) handleResult(result Result) error {
-	if result.Error() != nil {
-		return result.Error()
+func (a *App) handleResult(result result) error {
+	if result.error() != nil {
+		return result.error()
 	}
 
 	if a.Config.Short {
-		fmt.Println(result.Short())
+		fmt.Println(result.short())
 		return nil
 	}
 
-	fmt.Println(result.Result())
+	fmt.Println(result.result())
 	return nil
 }
 
-type Result interface {
-	Result() string
-	Short() string
-	Error() error
+type result interface {
+	result() string
+	short() string
+	error() error
 }
 
-type ResultError struct {
+type resultError struct {
 	err error
 }
 
-func (r *ResultError) Error() error {
+func (r *resultError) error() error {
 	return r.err
 }
 
@@ -89,17 +98,17 @@ type ipInRangeResult struct {
 	ip       string
 	ranges   string
 	contains bool
-	ResultError
+	resultError
 }
 
-func (r *ipInRangeResult) Result() string {
+func (r *ipInRangeResult) result() string {
 	if r.contains {
 		return fmt.Sprintf("%s is in %s", r.ip, r.ranges)
 	}
 	return fmt.Sprintf("%s is NOT in %s", r.ip, r.ranges)
 }
 
-func (r *ipInRangeResult) Short() string {
+func (r *ipInRangeResult) short() string {
 	return fmt.Sprintf("%t", r.contains)
 }
 
@@ -131,10 +140,10 @@ type cidrBoundariesResult struct {
 	from, to string
 	cidr     netip.Prefix
 	cidrLen  string
-	ResultError
+	resultError
 }
 
-func (r *cidrBoundariesResult) Result() string {
+func (r *cidrBoundariesResult) result() string {
 	return fmt.Sprintf("%s (%s addresses):\nfrom: %s\nto: %s", r.cidr, cidrLen(r.cidr), r.from, r.to)
 }
 
@@ -153,11 +162,11 @@ func cidrLen(cidr netip.Prefix) string {
 	return fmt.Sprintf("%d", cidrLen)
 }
 
-func (r *cidrBoundariesResult) Short() string {
+func (r *cidrBoundariesResult) short() string {
 	return fmt.Sprintf("%s-%s", r.from, r.to)
 }
 
-func (r *cidrBoundariesResult) Error() error {
+func (r *cidrBoundariesResult) error() error {
 	return r.err
 }
 
@@ -177,22 +186,22 @@ func cidrBoundaries(s string) cidrBoundariesResult {
 	return result
 }
 
-type NextPrevResult struct {
+type nextPrevResult struct {
 	outputPrefix string
 	addr         netip.Addr
-	ResultError
+	resultError
 }
 
-func (r *NextPrevResult) Result() string {
+func (r *nextPrevResult) result() string {
 	return fmt.Sprintf("%s IP: %s", r.outputPrefix, r.addr)
 }
 
-func (r *NextPrevResult) Short() string {
+func (r *nextPrevResult) short() string {
 	return r.addr.String()
 }
 
-func next(s string) NextPrevResult {
-	result := NextPrevResult{
+func next(s string) nextPrevResult {
+	result := nextPrevResult{
 		outputPrefix: "Next",
 	}
 	ip, err := netip.ParseAddr(s)
@@ -204,8 +213,8 @@ func next(s string) NextPrevResult {
 	return result
 }
 
-func prev(s string) NextPrevResult {
-	result := NextPrevResult{
+func prev(s string) nextPrevResult {
+	result := nextPrevResult{
 		outputPrefix: "Prev",
 	}
 	ip, err := netip.ParseAddr(s)
@@ -217,22 +226,22 @@ func prev(s string) NextPrevResult {
 	return result
 }
 
-type GetNResult struct {
+type getNResult struct {
 	ips   []string
 	count int
-	ResultError
+	resultError
 }
 
-func (r *GetNResult) Result() string {
+func (r *getNResult) result() string {
 	return fmt.Sprintf("%d IPs: %s", r.count, strings.Join(r.ips, ","))
 }
 
-func (r *GetNResult) Short() string {
+func (r *getNResult) short() string {
 	return fmt.Sprint(strings.Join(r.ips, ","))
 }
 
-func getN(s string, count int, offset int, tail bool) GetNResult {
-	result := GetNResult{
+func getN(s string, count int, offset int, tail bool) getNResult {
+	result := getNResult{
 		count: count,
 	}
 

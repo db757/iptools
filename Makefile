@@ -1,5 +1,6 @@
 BINARY_NAME := ipt
 DIST_DIR := ./dist
+GOLIST := $(shell go list ./...)
 
 build: tidy clean fmt vet test nix-update
 	mkdir ${DIST_DIR}/
@@ -16,7 +17,7 @@ fmt:
 .PHONY: fmt
 
 lint: fmt
-	golint ./...
+	golint ${GOLIST}
 .PHONY: lint
 
 test:

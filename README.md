@@ -89,7 +89,7 @@ Options:
 - `make vet`: Run go vet
 - `make lint`: Run linter
 - `make clean`: Clean build artifacts
-- `make targets`: Build for multiple platforms (linux-amd64, darwin-arm64)
+- `make targets`: Build for multiple platforms
 - `make govulncheck`: Run vulnerability checks
 - `make upgrade`: Upgrade dependencies
 - `make run`: Run the application (includes vet)

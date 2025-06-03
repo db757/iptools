@@ -9,8 +9,8 @@ import (
 	"go4.org/netipx"
 )
 
-// ParseRanges parses s as a space separated list of IP Ranges, returning the result and an error if any.
-func ParseRanges(s string) (*netipx.IPSet, error) {
+// Ranges parses s as a space separated list of IP Ranges, returning the result and an error if any.
+func Ranges(s string) (*netipx.IPSet, error) {
 	s = strings.ReplaceAll(s, ",", " ")
 	parts := strings.Fields(s)
 	if len(parts) == 0 {
@@ -19,7 +19,7 @@ func ParseRanges(s string) (*netipx.IPSet, error) {
 
 	var builder netipx.IPSetBuilder
 	for _, v := range parts {
-		ipset, err := ParseRange(v)
+		ipset, err := Range(v)
 		if err != nil {
 			return nil, err
 		}
@@ -37,13 +37,13 @@ var (
 	reCIDR  = regexp.MustCompile("^[0-9a-f.:]+/[0-9]{1,3}$") // addr/prefix_length
 )
 
-// ParseRange parses s as an IP Range, returning the result and an error if any.
+// Range parses s as an IP Range, returning the result and an error if any.
 // The string s can be in IPv4 address ("192.0.2.1"), IPv4 range ("192.0.2.0-192.0.2.10")
 // IPv4 CIDR ("192.0.2.0/24")
 // IPv6 address ("2001:db8::1"), IPv6 range ("2001:db8::-2001:db8::10"),
 // or IPv6 CIDR ("2001:db8::/64") form.
 // IPv4 CIDR, IPv4 subnet mask and IPv6 CIDR ranges don't include network and broadcast addresses.
-func ParseRange(s string) (*netipx.IPSet, error) {
+func Range(s string) (*netipx.IPSet, error) {
 	s = strings.ToLower(s)
 	if s == "" {
 		return nil, nil
