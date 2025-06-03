@@ -33,27 +33,27 @@ func NewApp() App {
 }
 
 func (a *App) InRangeHandler(context.Context, *cli.Command) error {
-	result := IPInRange(a.Input.Primary, a.Input.Secondary)
+	result := ipInRange(a.Input.Primary, a.Input.Secondary)
 	return a.handleResult(&result)
 }
 
 func (a *App) CIDRBoundariesHandler(context.Context, *cli.Command) error {
-	result := CIDRBoundaries(a.Input.Primary)
+	result := cidrBoundaries(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
 func (a *App) NextHandler(context.Context, *cli.Command) error {
-	result := Next(a.Input.Primary)
+	result := next(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
 func (a *App) PrevHandler(context.Context, *cli.Command) error {
-	result := Prev(a.Input.Primary)
+	result := prev(a.Input.Primary)
 	return a.handleResult(&result)
 }
 
 func (a *App) GetNHandler(_ context.Context, cmd *cli.Command) error {
-	result := GetN(a.Input.Primary, a.Input.Count, cmd.Int("offset"), cmd.Bool("tail"))
+	result := getN(a.Input.Primary, a.Input.Count, cmd.Int("offset"), cmd.Bool("tail"))
 	return a.handleResult(&result)
 }
 
@@ -103,7 +103,7 @@ func (r *ipInRangeResult) Short() string {
 	return fmt.Sprintf("%t", r.contains)
 }
 
-func IPInRange(ipStr, ranges string) ipInRangeResult {
+func ipInRange(ipStr, ranges string) ipInRangeResult {
 	result := ipInRangeResult{
 		ip:     ipStr,
 		ranges: ranges,
@@ -161,7 +161,7 @@ func (r *cidrBoundariesResult) Error() error {
 	return r.err
 }
 
-func CIDRBoundaries(s string) cidrBoundariesResult {
+func cidrBoundaries(s string) cidrBoundariesResult {
 	result := cidrBoundariesResult{}
 
 	cidr, err := netip.ParsePrefix(s)
@@ -191,7 +191,7 @@ func (r *NextPrevResult) Short() string {
 	return r.addr.String()
 }
 
-func Next(s string) NextPrevResult {
+func next(s string) NextPrevResult {
 	result := NextPrevResult{
 		outputPrefix: "Next",
 	}
@@ -204,7 +204,7 @@ func Next(s string) NextPrevResult {
 	return result
 }
 
-func Prev(s string) NextPrevResult {
+func prev(s string) NextPrevResult {
 	result := NextPrevResult{
 		outputPrefix: "Prev",
 	}
@@ -231,7 +231,7 @@ func (r *GetNResult) Short() string {
 	return fmt.Sprint(strings.Join(r.ips, ","))
 }
 
-func GetN(s string, count int, offset int, tail bool) GetNResult {
+func getN(s string, count int, offset int, tail bool) GetNResult {
 	result := GetNResult{
 		count: count,
 	}
