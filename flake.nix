@@ -2,7 +2,7 @@
   description = "github.com/db757/iptools development environment";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     gomod2nix = {
       url = "github:nix-community/gomod2nix";
